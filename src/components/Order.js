@@ -5,8 +5,12 @@ class Order extends React.Component {
 
     renderOrder = key => {
         const fish = this.props.fishes[key];
+
+        //check is fish exists in fishes
+        if (!fish) return <li key={key}>#20200329.1417</li>
+        
         const count = this.props.order[key];
-        const isAvailable = fish.status === 'available';
+        const isAvailable = fish && fish.status === 'available';
 
         if (!isAvailable)
             return <li key={key}>Sorry, {fish.name} is sold out </li>
@@ -19,6 +23,7 @@ class Order extends React.Component {
         const orderIds = Object.keys(this.props.order);
         const total = orderIds.reduce((prevTotal, key) => {
             const fish = this.props.fishes[key];
+
             const count = this.props.order[key];
             const isAvailable = fish && fish.status === 'available';
             if (isAvailable) {

@@ -4,7 +4,7 @@ import Inventory from './Inventory'
 import Order from './Order'
 import sampleFishes from '../sample-fishes'
 import Fish from './Fish'
-import base from '../base' 
+import base from '../base'
 
 class App extends React.Component {
 
@@ -15,14 +15,25 @@ class App extends React.Component {
 
     componentDidMount() {
 
-        // this.ref is not the same as this.refs ise for referencing inputs
-        this.ref = base.syncState(`${this.props.match.params.storeId}/fishes`, {context: this, state: "fishes"});
+        //update order with local storage w.r.t the the dtore name
+        const localStorageRef = localStorage.getItem(this.props.match.params.storeId);
+        if (localStorageRef) {
+            this.setState({ order: JSON.parse(localStorageRef) })
+        }
+
+        // this.ref is not the same as this.refs ise for referencing inputs. store reference to DB to unlisten when we leave the app
+        this.ref = base.syncState(`${this.props.match.params.storeId}/fishes`, { context: this, state: "fishes" });
+    }
+
+    componentDidUpdate() {
+        localStorage.setItem(this.props.match.params.storeId, JSON.stringify(this.state.order));
     }
 
     //unlisten to changes to DB
     componentWillUnmount() {
         base.remove(this.ref);
     }
+
 
     addFish = (fish) => {
         console.log("adding Fish", fish);
@@ -39,6 +50,12 @@ class App extends React.Component {
         const order = { ...this.state.order };
         order[key] = order[key] + 1 || 1;
         this.setState({ order });
+    }
+
+    updateFish = (key, updatedFish) => {
+        const fishes = { ...this.state.fishes };
+        fishes[key] = updatedFish;
+        this.setState({ fishes });
     }
 
     render() {
@@ -66,6 +83,8 @@ class App extends React.Component {
                 <Inventory
                     addFish={this.addFish}
                     loadSampleFishes={this.loadSampleFishes}
+                    fishes={this.state.fishes}
+                    updateFish={this.updateFish}
                 ></Inventory>
             </div>
         )
